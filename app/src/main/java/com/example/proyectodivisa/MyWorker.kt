@@ -6,6 +6,8 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.util.Log
+import com.example.proyectodivisa.model.Divisa
+import com.example.proyectodivisa.room.AppDatabase
 
 class MyWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
@@ -22,6 +24,14 @@ class MyWorker(appContext: Context, workerParams: WorkerParameters) :
                 response.conversion_rates.forEach { (currency, rate) ->
                     Log.d("API Response", "$currency: $rate")
                 }
+
+                // Guarda los datos en la base de datos
+                val exchangeRates = response.conversion_rates.map { (currency, rate) ->
+                    Divisa(currency = currency, rate = rate)
+                }
+                val database = AppDatabase.getDatabase(applicationContext)
+                database.exchangeRateDao().insertAll(exchangeRates)
+
                 Result.success()
             } else {
                 Log.e("API Response", "Error en la respuesta: ${response.result}")

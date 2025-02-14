@@ -1,6 +1,7 @@
 package com.example.proyectodivisa
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.proyectodivisa.room.AppDatabase
 import com.example.proyectodivisa.ui.theme.ProyectoDivisaTheme
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -29,6 +33,14 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Greeting("WorkManager App")
                 }
+            }
+        }
+
+        GlobalScope.launch {
+            val database = AppDatabase.getDatabase(this@MainActivity)
+            val exchangeRates = database.exchangeRateDao().getExchangeRatesByDate(System.currentTimeMillis())
+            exchangeRates.forEach {
+                Log.d("Database", "${it.currency}: ${it.rate}")
             }
         }
     }
